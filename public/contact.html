@@ -1,27 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>My Website - Contact</title>
+    <meta charset="UTF-8" />
+    <title>Contact Me</title>
     <link rel="stylesheet" href="style.css" />
+    <style>
+      main {
+        max-width: 600px;
+        margin: 50px auto;
+        background: #111;
+        padding: 30px;
+        border-radius: 12px;
+        color: #fff;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 6px;
+        border: none;
+        outline: none;
+      }
+      button {
+        padding: 12px 20px;
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      button:hover {
+        background: #333;
+      }
+      p#status {
+        margin-top: 10px;
+      }
+    </style>
   </head>
   <body>
-    <header>
-      <h1>My Website</h1>
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="about.html">About Me</a>
-        <a href="contact.html">Contact</a>
-      </nav>
-    </header>
-
     <main>
-      <h2>Contact</h2>
-      <p>Feel free to reach out to me via email or social media.</p>
-      <button onclick="alert('Contact me at pritamsite@example.com')">
-        Get in Touch
-      </button>
+      <h2>Contact Me</h2>
+      <form id="contactForm">
+        <input type="text" name="name" placeholder="Your Name" required />
+        <input type="email" name="email" placeholder="Your Email" required />
+        <textarea
+          name="message"
+          placeholder="Your Message"
+          rows="6"
+          required
+        ></textarea>
+        <button type="submit">Send Message</button>
+        <p id="status"></p>
+      </form>
     </main>
 
-    <footer>&copy; 2025 Pritam Dey Roy</footer>
+    <script>
+      const form = document.getElementById("contactForm");
+      const status = document.getElementById("status");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        status.innerText = "Sending...";
+        const formData = {
+          name: form.name.value,
+          email: form.email.value,
+          message: form.message.value,
+        };
+        try {
+          const res = await fetch("/contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          });
+          const data = await res.json();
+          if (data.success) {
+            status.innerText = "Message sent successfully!";
+            form.reset();
+          } else {
+            status.innerText = "Failed to send message.";
+          }
+        } catch (err) {
+          status.innerText = "Error sending message.";
+          console.error(err);
+        }
+      });
+    </script>
   </body>
 </html>

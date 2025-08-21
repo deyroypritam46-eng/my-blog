@@ -1,70 +1,98 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
-const path = require("path");
 const multer = require("multer");
+const nodemailer = require("nodemailer");
+const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-// Multer setup for image uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-const upload = multer({ storage: storage });
+// ---------------------
+// POSTS HANDLING
+// ---------------------
 
-// Ensure uploads folder exists
-if (!fs.existsSync("public/uploads")) fs.mkdirSync("public/uploads");
+const POSTS_FILE = "posts.json";
 
-// Routes
+// Fetch all posts
 app.get("/posts", (req, res) => {
-  const posts = JSON.parse(fs.readFileSync("posts.json"));
-  res.json(posts);
+  if (fs.existsSync(POSTS_FILE)) {
+    const posts = JSON.parse(fs.readFileSync(POSTS_FILE));
+    res.json(posts);
+  } else {
+    res.json([]);
+  }
 });
 
-app.post("/posts", upload.single("image"), (req, res) => {
-  const posts = JSON.parse(fs.readFileSync("posts.json"));
+// Save new post
+app.post("/publish", (req, res) => {
+  const { title, content } = req.body;
+
+  if (!title || !content)
+    return res.json({ success: false, msg: "Missing title or content" });
+
+  let posts = [];
+  if (fs.existsSync(POSTS_FILE)) {
+    posts = JSON.parse(fs.readFileSync(POSTS_FILE));
+  }
+
   const newPost = {
     id: Date.now(),
-    title: req.body.title,
-    content: req.body.content,
-    category: req.body.category || "General",
-    tags: req.body.tags ? req.body.tags.split(",") : [],
-    image: req.file ? `/uploads/${req.file.filename}` : null,
+    title,
+    content,
+    date: new Date().toISOString(),
   };
-  posts.unshift(newPost);
-  fs.writeFileSync("posts.json", JSON.stringify(posts, null, 2));
+
+  posts.unshift(newPost); // add newest first
+  fs.writeFileSync(POSTS_FILE, JSON.stringify(posts, null, 2));
+
   res.json({ success: true, post: newPost });
 });
 
-app.put("/posts/:id", (req, res) => {
-  let posts = JSON.parse(fs.readFileSync("posts.json"));
-  const id = parseInt(req.params.id);
-  posts = posts.map((post) =>
-    post.id === id ? { ...post, ...req.body } : post
-  );
-  fs.writeFileSync("posts.json", JSON.stringify(posts, null, 2));
-  res.json({ success: true });
+// ---------------------
+// CONTACT FORM HANDLING
+// ---------------------
+
+app.post("/contact", async (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message) {
+    return res.json({ success: false, msg: "Missing fields" });
+  }
+
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER || "deyroypritam46@gmail.com",
+        pass: process.env.GMAIL_PASS || "YOUR_GMAIL_APP_PASSWORD",
+      },
+    });
+
+    let mailOptions = {
+      from: email,
+      to: "deyroypritam46@gmail.com",
+      subject: `Contact Form Message from ${name}`,
+      text: message,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false });
+  }
 });
 
-app.delete("/posts/:id", (req, res) => {
-  let posts = JSON.parse(fs.readFileSync("posts.json"));
-  const id = parseInt(req.params.id);
-  posts = posts.filter((post) => post.id !== id);
-  fs.writeFileSync("posts.json", JSON.stringify(posts, null, 2));
-  res.json({ success: true });
-});
+// ---------------------
+// START SERVER
+// ---------------------
 
-app.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
