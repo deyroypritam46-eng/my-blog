@@ -1,0 +1,16 @@
+{
+  "name": "my-website-backend",
+  "version": "1.0.0",
+  "description": "Professional Blog with Node.js backend",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Pritam Dey Roy",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "multer": "^2.0.0-rc.1"
+  }
+}

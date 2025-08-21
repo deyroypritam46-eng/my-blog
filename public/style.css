@@ -1,0 +1,109 @@
+/* ---------- General ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #fff;
+  color: #222;
+  line-height: 1.6;
+}
+h2 {
+  text-align: center;
+  margin: 20px 0;
+}
+
+/* ---------- Header & Nav ---------- */
+header {
+  background: #000;
+  color: #fff;
+  padding: 20px 30px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+header h1 {
+  font-size: 28px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 25px;
+  transition: 0.3s;
+  border: 1px solid #fff;
+}
+nav a:hover {
+  background: #fff;
+  color: #000;
+}
+
+/* ---------- Buttons ---------- */
+button {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 50px;
+  margin: 10px 0;
+  transition: 0.3s;
+}
+button:hover {
+  background: linear-gradient(45deg, #333, #555);
+  transform: scale(1.05);
+}
+
+/* ---------- Main ---------- */
+main {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
+.post-card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+.post-card img {
+  max-width: 100%;
+  margin: 10px 0;
+  border-radius: 8px;
+}
+
+/* ---------- Footer ---------- */
+footer {
+  background: #000;
+  color: #fff;
+  padding: 20px 30px;
+  text-align: center;
+  margin-top: 50px;
+}
+
+/* ---------- Quill Editor ---------- */
+#editor {
+  height: 200px;
+  margin-bottom: 20px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+  }
+  nav a {
+    margin-bottom: 10px;
+  }
+}

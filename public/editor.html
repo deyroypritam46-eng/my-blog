@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Create Post</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header><h1>New Blog Post</h1></header>
+
+    <main>
+      <input
+        type="text"
+        id="title"
+        placeholder="Title"
+        style="width: 100%; padding: 10px; margin-bottom: 10px"
+      />
+      <input
+        type="text"
+        id="category"
+        placeholder="Category"
+        style="width: 100%; padding: 10px; margin-bottom: 10px"
+      />
+      <input
+        type="text"
+        id="tags"
+        placeholder="Tags (comma separated)"
+        style="width: 100%; padding: 10px; margin-bottom: 10px"
+      />
+      <input type="file" id="image" style="margin-bottom: 10px" />
+      <div id="editor"></div>
+      <button id="publish">Publish Post</button>
+      <p id="status"></p>
+
+      <h2>Published Posts</h2>
+      <div id="postList"></div>
+    </main>
+
+    <footer>&copy; 2025 Pritam Dey Roy</footer>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+      const quill = new Quill("#editor", { theme: "snow" });
+
+      const status = document.getElementById("status");
+      const postList = document.getElementById("postList");
+      const publishBtn = document.getElementById("publish");
+
+      async function loadPosts() {
+        const res = await fetch("/posts");
+        const posts = await res.json();
+        postList.innerHTML = "";
+        posts.forEach((post) => {
+          const div = document.createElement("div");
+          div.className = "post-card";
+          div.innerHTML = `<h3>${post.title}</h3><p><strong>Category:</strong> ${post.category}</p><p>${post.content}</p>`;
+          if (post.image) div.innerHTML += `<img src="${post.image}">`;
+          div.innerHTML += `<button onclick="deletePost(${post.id})">Delete</button>`;
+          postList.appendChild(div);
+        });
+      }
+
+      async function deletePost(id) {
+        await fetch("/posts/" + id, { method: "DELETE" });
+        loadPosts();
+      }
+
+      publishBtn.addEventListener("click", async () => {
+        const title = document.getElementById("title").value;
+        const category = document.getElementById("category").value;
+        const tags = document.getElementById("tags").value;
+        const content = quill.root.innerHTML;
+        const image = document.getElementById("image").files[0];
+
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("category", category);
+        formData.append("tags", tags);
+        formData.append("content", content);
+        if (image) formData.append("image", image);
+
+        const res = await fetch("/posts", { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.success) {
+          status.innerText = "Post Published!";
+          document.getElementById("title").value = "";
+          document.getElementById("category").value = "";
+          document.getElementById("tags").value = "";
+          quill.root.innerHTML = "";
+          document.getElementById("image").value = "";
+          loadPosts();
+        } else {
+          status.innerText = "Error publishing post.";
+        }
+      });
+
+      loadPosts();
+    </script>
+  </body>
+</html>

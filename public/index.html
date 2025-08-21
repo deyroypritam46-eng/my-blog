@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Blog - Home</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>My Blog</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About Me</a>
+        <a href="contact.html">Contact</a>
+        <a href="editor.html">New Post</a>
+      </nav>
+    </header>
+
+    <main>
+      <h2>Blog Posts</h2>
+      <input
+        type="text"
+        id="search"
+        placeholder="Search posts..."
+        style="width: 100%; padding: 10px; margin-bottom: 20px"
+      />
+      <div id="postsContainer"></div>
+    </main>
+
+    <footer>&copy; 2025 Pritam Dey Roy</footer>
+
+    <script>
+      async function loadPosts(query = "") {
+        const res = await fetch("/posts");
+        const posts = await res.json();
+        const container = document.getElementById("postsContainer");
+        container.innerHTML = "";
+        posts
+          .filter(
+            (p) =>
+              p.title.toLowerCase().includes(query.toLowerCase()) ||
+              p.content.toLowerCase().includes(query.toLowerCase())
+          )
+          .forEach((post) => {
+            const div = document.createElement("div");
+            div.className = "post-card";
+            div.innerHTML = `<h3>${post.title}</h3><p><strong>Category:</strong> ${post.category}</p><p>${post.content}</p>`;
+            if (post.image) div.innerHTML += `<img src="${post.image}">`;
+            container.appendChild(div);
+          });
+        if (container.innerHTML === "")
+          container.innerHTML =
+            '<p style="text-align:center;">No posts found.</p>';
+      }
+
+      document.getElementById("search").addEventListener("input", (e) => {
+        loadPosts(e.target.value);
+      });
+
+      loadPosts();
+    </script>
+  </body>
+</html>
